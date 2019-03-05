@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+}
+
+group 'lwjgl'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    compile group: 'org.lwjgl', name: 'lwjgl', version: '3.2.1'
+
+    compile group: 'org.lwjgl', name: 'lwjgl-platform', version: '3.0.0', ext: 'pom'
+    
+    compile group: 'org.lwjgl', name: 'lwjgl-opengl', version: '3.2.1'
+
+    compile group: 'org.lwjgl', name: 'lwjgl-glfw', version: '3.2.1'
+
+    compile group: 'org.joml', name: 'joml', version: '1.9.13'
+
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+}

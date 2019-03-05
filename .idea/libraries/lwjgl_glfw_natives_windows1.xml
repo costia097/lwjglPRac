@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="lwjgl-glfw-natives-windows1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/src/main/resources/lwjgl-glfw-natives-windows.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
