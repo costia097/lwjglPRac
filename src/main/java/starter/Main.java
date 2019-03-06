@@ -9,7 +9,9 @@ import static org.lwjgl.glfw.GLFW.glfwInit;
 import static org.lwjgl.glfw.GLFW.glfwTerminate;
 
 public class Main {
+
     public static void main(String[] args) {
+
         /*
         check version
          */
@@ -31,12 +33,15 @@ public class Main {
         /*
         Create window object
          */
-        Window window = new Window(320, 240, "window");
+        Window window = new Window(1280, 720, "window");
 
         /*
         Create SceneRender
          */
         SceneRender sceneRender = new SceneRender();
+
+        sceneRender.createTriangle();
+        sceneRender.compileShaders();
 
         /*
         main loop
