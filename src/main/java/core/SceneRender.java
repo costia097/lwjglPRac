@@ -30,6 +30,7 @@ import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glGetProgramInfoLog;
 import static org.lwjgl.opengl.GL20.glGetProgramiv;
 import static org.lwjgl.opengl.GL20.glGetShaderInfoLog;
+import static org.lwjgl.opengl.GL20.glGetShaderiv;
 import static org.lwjgl.opengl.GL20.glLinkProgram;
 import static org.lwjgl.opengl.GL20.glShaderSource;
 import static org.lwjgl.opengl.GL20.glUseProgram;
@@ -173,12 +174,12 @@ public class SceneRender {
 
         int[] resultOfCompile = new int[1];
 
-        glGetProgramiv(shader, GL_COMPILE_STATUS, resultOfCompile);
+        glGetShaderiv(shader, GL_COMPILE_STATUS, resultOfCompile);
 
         /*
         if something went wrong
          */
-        if (resultOfCompile[0] == 1) {
+        if (resultOfCompile[0] == 0) {
             /*
             info log
             */

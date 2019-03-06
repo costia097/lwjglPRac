@@ -33,7 +33,7 @@ public class Main {
         /*
         Create window object
          */
-        Window window = new Window(1280, 720, "window");
+        Window window = new Window(640, 360, "window");
 
         /*
         Create SceneRender
