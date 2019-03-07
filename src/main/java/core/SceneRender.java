@@ -31,8 +31,10 @@ import static org.lwjgl.opengl.GL20.glGetProgramInfoLog;
 import static org.lwjgl.opengl.GL20.glGetProgramiv;
 import static org.lwjgl.opengl.GL20.glGetShaderInfoLog;
 import static org.lwjgl.opengl.GL20.glGetShaderiv;
+import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL20.glLinkProgram;
 import static org.lwjgl.opengl.GL20.glShaderSource;
+import static org.lwjgl.opengl.GL20.glUniform1f;
 import static org.lwjgl.opengl.GL20.glUseProgram;
 import static org.lwjgl.opengl.GL20.glValidateProgram;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
@@ -43,6 +45,14 @@ public class SceneRender {
 
     private int VAO;
     private int shader;
+
+    private int uniformXMove;
+    private boolean direction = true;
+    private float triOffset = 0.0f;
+    @SuppressWarnings("FieldCanBeLocal")
+    private final float maxTriOff = 0.7f;
+    @SuppressWarnings("FieldCanBeLocal")
+    private final float triIncremnt = 0.005f;
 
     public SceneRender() {
         /*
@@ -62,6 +72,21 @@ public class SceneRender {
         idk
          */
         glUseProgram(shader);
+
+        if (direction) {
+            triOffset += triIncremnt;
+        } else {
+            triOffset -= triIncremnt;
+        }
+
+        if (Math.abs(triOffset) >= maxTriOff) {
+            direction = !direction;
+        }
+
+        /*
+        idk -???
+         */
+        glUniform1f(uniformXMove, triOffset);
 
         /*
         idk
@@ -273,6 +298,12 @@ public class SceneRender {
             String infoLog = glGetProgramInfoLog(shader);
             System.out.println("BADly when validate: " + infoLog);
         }
+
+        /*
+        something like biding
+        idk -???
+         */
+        uniformXMove = glGetUniformLocation(shader, "xMove");
     }
 
 }
