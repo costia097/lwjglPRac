@@ -1,8 +1,12 @@
 package core;
 
 import org.apache.commons.io.IOUtils;
+import org.joml.Matrix4d;
+import org.joml.Vector3d;
+import org.lwjgl.BufferUtils;
 
 import java.io.IOException;
+import java.nio.FloatBuffer;
 import java.nio.charset.Charset;
 
 import static com.sun.org.apache.bcel.internal.util.SecuritySupport.getResourceAsStream;
@@ -35,6 +39,7 @@ import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL20.glLinkProgram;
 import static org.lwjgl.opengl.GL20.glShaderSource;
 import static org.lwjgl.opengl.GL20.glUniform1f;
+import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
 import static org.lwjgl.opengl.GL20.glUseProgram;
 import static org.lwjgl.opengl.GL20.glValidateProgram;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
@@ -46,7 +51,10 @@ public class SceneRender {
     private int VAO;
     private int shader;
 
-    private int uniformXMove;
+    /*
+    yeap important naming like model  so there are 4 types ...
+     */
+    private int uniformModel;
     private boolean direction = true;
     private float triOffset = 0.0f;
     @SuppressWarnings("FieldCanBeLocal")
@@ -73,6 +81,10 @@ public class SceneRender {
          */
         glUseProgram(shader);
 
+
+        /*
+        some logic
+         */
         if (direction) {
             triOffset += triIncremnt;
         } else {
@@ -86,8 +98,25 @@ public class SceneRender {
         /*
         idk -???
          */
-        glUniform1f(uniformXMove, triOffset);
+        glUniform1f(uniformModel, triOffset);
 
+        /*
+        need to create flat buffer
+        16 floats because matrix 4on 4 equal 16 slots
+         */
+        FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
+
+
+        Matrix4d translate = new Matrix4d().translate(new Vector3d(triOffset,  0, 0));
+
+        translate.get(matrixBuffer);
+
+        System.out.println(translate);
+
+        /*
+        idk -->??
+         */
+        glUniformMatrix4fv(uniformModel, false, matrixBuffer);
         /*
         idk
          */
@@ -303,7 +332,7 @@ public class SceneRender {
         something like biding
         idk -???
          */
-        uniformXMove = glGetUniformLocation(shader, "xMove");
+        uniformModel = glGetUniformLocation(shader, "model");
     }
 
 }

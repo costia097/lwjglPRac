@@ -8,7 +8,7 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import static org.lwjgl.glfw.GLFW.glfwInit;
 import static org.lwjgl.glfw.GLFW.glfwTerminate;
 
-public class Main {
+public class StartEngine {
 
     public static void main(String[] args) {
 
