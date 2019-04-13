@@ -33,7 +33,7 @@ public class StartEngine {
         /*
         Create window object
          */
-        Window window = new Window(640, 360, "window");
+        Window window = new Window(800, 600, "LearnOpenGL");
 
         /*
         Create SceneRender

@@ -30,6 +30,7 @@ import static org.lwjgl.opengl.GL20.glAttachShader;
 import static org.lwjgl.opengl.GL20.glCompileShader;
 import static org.lwjgl.opengl.GL20.glCreateProgram;
 import static org.lwjgl.opengl.GL20.glCreateShader;
+import static org.lwjgl.opengl.GL20.glDeleteShader;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glGetProgramInfoLog;
 import static org.lwjgl.opengl.GL20.glGetProgramiv;
@@ -49,7 +50,7 @@ import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 public class SceneRender {
 
     private int VAO;
-    private int shader;
+    private int shaderProgram;
 
     /*
     yeap important naming like model  so there are 4 types ...
@@ -61,6 +62,10 @@ public class SceneRender {
     private final float maxTriOff = 0.7f;
     @SuppressWarnings("FieldCanBeLocal")
     private final float triIncremnt = 0.005f;
+    @SuppressWarnings("FieldCanBeLocal")
+    private final float toRadians = (float) (Math.PI / 180.0);
+
+    private float currentAngle = 0.0f;
 
     public SceneRender() {
         /*
@@ -72,14 +77,15 @@ public class SceneRender {
 
     public void render() {
         /*
-        idk???
+       clear screen color before render something
          */
         glClear(GL_COLOR_BUFFER_BIT);
 
         /*
-        idk
+        sets the given shader program to render
+        - Every shader and rendering call after glUseProgram
          */
-        glUseProgram(shader);
+        glUseProgram(shaderProgram);
 
 
         /*
@@ -96,6 +102,11 @@ public class SceneRender {
         }
 
         /*
+        some logic with rotate
+         */
+        currentAngle += 0.1f;
+
+        /*
         idk -???
          */
         glUniform1f(uniformModel, triOffset);
@@ -107,27 +118,35 @@ public class SceneRender {
         FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
 
 
-        Matrix4d translate = new Matrix4d().translate(new Vector3d(triOffset,  0, 0));
+        Matrix4d translate = new Matrix4d()
+                .translate(new Vector3d(triOffset, 0, 0))
+                .rotate(currentAngle * toRadians, new Vector3d(0, 0, 1));
 
         translate.get(matrixBuffer);
-
-        System.out.println(translate);
 
         /*
         idk -->??
          */
         glUniformMatrix4fv(uniformModel, false, matrixBuffer);
+
         /*
-        idk
+        Binds a vertex array object
          */
         glBindVertexArray(VAO);
 
-        /*
-        idk
-         */
+       /*
+       The glDrawArrays function takes as its first argument the OpenGL primitive type we would like to draw.
+       Since I said at the start we wanted to draw a triangle, and I don't like lying to you, we pass in GL_TRIANGLES.
+       The second argument specifies the starting index of the vertex array we'd like to draw; we just leave this at 0.
+       The last argument specifies how many vertices we want to draw, which is 3 (we only render 1 triangle from our data, which is exactly 3 vertices long).
+        */
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
+        /*
+        unbiding
+         */
         glBindVertexArray(0);
+
         /*
         unbiding
          */
@@ -158,7 +177,6 @@ public class SceneRender {
         /*
         generate vertex array object
          */
-
         int vao = glGenVertexArrays();
 
         VAO = vao;
@@ -172,30 +190,55 @@ public class SceneRender {
         generate vertex buffer object
         --
         seems like can create with parameters
+        we can create one or many buffers objects VBO
          */
         int vbo = glGenBuffers();
 
         /*
         binding vertex buffer object
 
-        target can be specified -- ???
+        target can be specified -- yeap
          */
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
         /*
-        idk ??
-        static_draw ??
-        dynamic_draw ??
+        copy previous vertex data to buffer memory
+        -- target where we copy is previously bound buffer
+
+        The fourth parameter specifies how we want the graphics card to manage the given data. This can take 3 forms:
+        -- GL_STATIC_DRAW: the data will most likely not change at all or very rarely.
+        -- GL_DYNAMIC_DRAW: the data is likely to change a lot.
+        -- GL_STREAM_DRAW: the data will change every time it is drawn.
          */
         glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
 
         /*
-        idk >>> ???
+        The function glVertexAttribPointer has quite a few parameters so let's carefully walk through them:
+
+        -- The first parameter specifies which vertex attribute we want to configure.
+             Remember that we specified the location of the position vertex attribute in the vertex shader with layout (location = 0).
+             This sets the location of the vertex attribute to 0 and since we want to pass data to this vertex attribute, we pass in 0.
+
+        -- The next argument specifies the size of the vertex attribute. The vertex attribute is a vec3 so it is composed of 3 values.
+
+        -- The third argument specifies the type of the data which is GL_FLOAT (a vec* in GLSL consists of floating point values).
+
+        -- The next argument specifies if we want the data to be normalized.
+             If we're inputting integer data types (int, byte) and we've set this to GL_TRUE, the integer data is normalized to 0 (or -1 for signed data) and 1 when converted to float.
+             This is not relevant for us so we'll leave this at GL_FALSE.
+
+        -- The fifth argument is known as the stride and tells us the space between consecutive vertex attributes.
+             Since the next set of position data is located exactly 3 times the size of a float away we specify that value as the stride.
+             Note that since we know that the array is tightly packed (there is no space between the next vertex attribute value) we could've also specified the stride as 0 to let OpenGL
+             determine the stride (this only works when values are tightly packed).
+
+        -- The last parameter is of type void* and thus requires that weird cast. This is the offset of where the position data begins in the buffer.
+             Since the position data is at the start of the data array this value is just 0. We will explore this parameter in more detail later on
          */
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 
         /*
-        idk -???
+        Enables a generic vertex attribute array.
          */
         glEnableVertexAttribArray(0);
 
@@ -210,25 +253,30 @@ public class SceneRender {
         glBindVertexArray(0);
     }
 
-    /*
-    idk  -- >>???
-     */
-    private void addShader(int theProgram, String shaderCode, int shaderType) {
-        int shader = glCreateShader(shaderType);
+
+    private int addShader(int shaderProgram, String shaderCode, int shaderType) {
 
         /*
-        idk -???
+        creates a shader object.
          */
-        glShaderSource(shader, shaderCode);
+        int shaderObject = glCreateShader(shaderType);
 
         /*
-        something compiling
+        link the given shader object between source code of this shader
          */
-        glCompileShader(shader);
+        glShaderSource(shaderObject, shaderCode);
+
+        /*
+        compiling shader code
+         */
+        glCompileShader(shaderObject);
 
         int[] resultOfCompile = new int[1];
 
-        glGetShaderiv(shader, GL_COMPILE_STATUS, resultOfCompile);
+        /*
+        get result of compiling
+         */
+        glGetShaderiv(shaderObject, GL_COMPILE_STATUS, resultOfCompile);
 
         /*
         if something went wrong
@@ -237,33 +285,35 @@ public class SceneRender {
             /*
             info log
             */
-            String infoLog = glGetShaderInfoLog(shader);
+            String infoLog = glGetShaderInfoLog(shaderObject);
             System.out.println("BAD compile shader: " + infoLog);
-            return;
+            return 0;
         }
 
         /*
-        idk -???
+        attach the shader object to shader program
          */
-        glAttachShader(theProgram, shader);
+        glAttachShader(shaderProgram, shaderObject);
 
-
-
+        return shaderObject;
     }
 
     /*
     idk
      */
     public void compileShaders() {
-        int shader = glCreateProgram();
+        /*
+        create a program object
+         */
+        int shaderProgram = glCreateProgram();
 
-        this.shader = shader;
+        this.shaderProgram = shaderProgram;
 
         /*
         maybe thus ???
          */
-        if (shader == 0) {
-            System.out.println("Error while creating shader program");
+        if (shaderProgram == 0) {
+            System.out.println("Error while creating shaderProgram program");
             return ;
         }
 
@@ -271,30 +321,33 @@ public class SceneRender {
         String fShader = "";
 
         try {
-            vShader = IOUtils.toString(getResourceAsStream("shader.vert"), Charset.defaultCharset());
-            fShader = IOUtils.toString(getResourceAsStream("shader.frag"), Charset.defaultCharset());
+            vShader = IOUtils.toString(getResourceAsStream("shaders/vertex/shader.vert"), Charset.defaultCharset());
+            fShader = IOUtils.toString(getResourceAsStream("shaders/fragment/shader.frag"), Charset.defaultCharset());
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         /*
-        add vertex shader
+        add vertex shaderProgram
          */
-        addShader(shader, vShader, GL_VERTEX_SHADER);
+        int vertexShader = addShader(shaderProgram, vShader, GL_VERTEX_SHADER);
 
         /*
-        add fragment shader
+        add fragment shaderProgram
          */
-        addShader(shader, fShader, GL_FRAGMENT_SHADER);
+        int fragmentShader = addShader(shaderProgram, fShader, GL_FRAGMENT_SHADER);
 
         /*
-        idk ->>???
+        link all attached shaders in one final shader program object
          */
-        glLinkProgram(shader);
+        glLinkProgram(shaderProgram);
 
         int[] result = new int[1];
 
-        glGetProgramiv(shader, GL_LINK_STATUS, result);
+        /*
+        get info about shader link
+         */
+        glGetProgramiv(shaderProgram, GL_LINK_STATUS, result);
 
         /*
         if something went wrong
@@ -304,17 +357,20 @@ public class SceneRender {
             /*
             info log
             */
-            String infoLog = glGetProgramInfoLog(shader);
-            System.out.println("BAD: " + infoLog);
+            String infoLog = glGetProgramInfoLog(shaderProgram);
+            System.out.println("Error in shader code: " + infoLog);
             return ;
         }
 
         /*
         validate something
          */
-        glValidateProgram(shader);
+        glValidateProgram(shaderProgram);
 
-        glGetProgramiv(shader, GL_VALIDATE_STATUS, result);
+        /*
+        get info about program
+         */
+        glGetProgramiv(shaderProgram, GL_VALIDATE_STATUS, result);
 
          /*
         if something went wrong
@@ -324,15 +380,22 @@ public class SceneRender {
             /*
             info log
             */
-            String infoLog = glGetProgramInfoLog(shader);
-            System.out.println("BADly when validate: " + infoLog);
+            String infoLog = glGetProgramInfoLog(shaderProgram);
+            System.out.println("Error in shader program: " + infoLog);
         }
+
+        /*
+        delete shader to clean up memory
+         */
+        glDeleteShader(vertexShader);
+
+        glDeleteShader(fragmentShader);
 
         /*
         something like biding
         idk -???
          */
-        uniformModel = glGetUniformLocation(shader, "model");
+        uniformModel = glGetUniformLocation(shaderProgram, "model");
     }
 
 }
