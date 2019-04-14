@@ -40,7 +40,10 @@ public class StartEngine {
          */
         SceneRender sceneRender = new SceneRender();
 
-        sceneRender.createTriangle();
+//        sceneRender.createTriangle();
+//        sceneRender.createRectangle();
+        sceneRender.createColorTriangle();
+
         sceneRender.compileShaders();
 
         /*

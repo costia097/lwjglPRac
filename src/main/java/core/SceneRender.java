@@ -4,6 +4,7 @@ import org.apache.commons.io.IOUtils;
 import org.joml.Matrix4d;
 import org.joml.Vector3d;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
@@ -12,11 +13,17 @@ import java.nio.charset.Charset;
 import static com.sun.org.apache.bcel.internal.util.SecuritySupport.getResourceAsStream;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
+import static org.lwjgl.opengl.GL11.GL_FRONT_AND_BACK;
+import static org.lwjgl.opengl.GL11.GL_LINE;
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
+import static org.lwjgl.opengl.GL11.GL_UNSIGNED_INT;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
 import static org.lwjgl.opengl.GL11.glDrawArrays;
+import static org.lwjgl.opengl.GL11.glDrawElements;
+import static org.lwjgl.opengl.GL11.glPolygonMode;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL15.GL_ELEMENT_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 import static org.lwjgl.opengl.GL15.glBindBuffer;
 import static org.lwjgl.opengl.GL15.glBufferData;
@@ -40,6 +47,7 @@ import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL20.glLinkProgram;
 import static org.lwjgl.opengl.GL20.glShaderSource;
 import static org.lwjgl.opengl.GL20.glUniform1f;
+import static org.lwjgl.opengl.GL20.glUniform4f;
 import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
 import static org.lwjgl.opengl.GL20.glUseProgram;
 import static org.lwjgl.opengl.GL20.glValidateProgram;
@@ -72,7 +80,7 @@ public class SceneRender {
         i think clean screen before actions
         make it fully black
          */
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     }
 
     public void render() {
@@ -91,43 +99,51 @@ public class SceneRender {
         /*
         some logic
          */
-        if (direction) {
-            triOffset += triIncremnt;
-        } else {
-            triOffset -= triIncremnt;
-        }
-
-        if (Math.abs(triOffset) >= maxTriOff) {
-            direction = !direction;
-        }
+//        if (direction) {
+//            triOffset += triIncremnt;
+//        } else {
+//            triOffset -= triIncremnt;
+//        }
+//
+//        if (Math.abs(triOffset) >= maxTriOff) {
+//            direction = !direction;
+//        }
 
         /*
         some logic with rotate
          */
-        currentAngle += 0.1f;
+//        currentAngle += 0.1f;
 
         /*
         idk -???
          */
-        glUniform1f(uniformModel, triOffset);
+//        glUniform1f(uniformModel, triOffset);
 
         /*
         need to create flat buffer
         16 floats because matrix 4on 4 equal 16 slots
          */
-        FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
+//        FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
 
 
-        Matrix4d translate = new Matrix4d()
-                .translate(new Vector3d(triOffset, 0, 0))
-                .rotate(currentAngle * toRadians, new Vector3d(0, 0, 1));
-
-        translate.get(matrixBuffer);
+//        Matrix4d translate = new Matrix4d()
+//                .translate(new Vector3d(triOffset, 0, 0))
+//                .rotate(currentAngle * toRadians, new Vector3d(0, 0, 1));
+//
+//        translate.get(matrixBuffer);
 
         /*
         idk -->??
          */
-        glUniformMatrix4fv(uniformModel, false, matrixBuffer);
+//        glUniformMatrix4fv(uniformModel, false, matrixBuffer);
+
+//        double timeValue = GLFW.glfwGetTime();
+
+//        float greenValue = (float) ((Math.sin(timeValue) / 2.0d) + 0.5d);
+//
+//        int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+//
+//        glUniform4f(vertexColorLocation, 0, greenValue, 0, 1);
 
         /*
         Binds a vertex array object
@@ -141,6 +157,11 @@ public class SceneRender {
        The last argument specifies how many vertices we want to draw, which is 3 (we only render 1 triangle from our data, which is exactly 3 vertices long).
         */
         glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        /*
+         -- !!! Use that to indicate that we want to draw from an index buffer. For example in ebo (element buffer object) where we pass indexes
+         */
+//        glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
 
         /*
         unbiding
@@ -251,6 +272,82 @@ public class SceneRender {
         unbinding vertex array object
          */
         glBindVertexArray(0);
+    }
+
+    public void createRectangle() {
+
+        int vbo, vao, ebo;
+
+        /*
+        vertices of rectangle
+         */
+        float[] vertices = {
+                0.5f,  0.5f, 0.0f,  // top right // 0
+                0.5f, -0.5f, 0.0f,  // bottom right // 1
+                -0.5f, -0.5f, 0.0f,  // bottom left // 2
+                -0.5f,  0.5f, 0.0f   // top left // 3
+        };
+
+        /*
+        idk
+         */
+        int[] indexes = {
+                0, 1, 3,   // first triangle
+                1, 2, 3    // second triangle
+        };
+
+        ebo = glGenBuffers();
+        vbo = glGenBuffers();
+        vao = glGenVertexArrays();
+
+        this.VAO = vao;
+
+        glBindVertexArray(vao);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexes, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+        glEnableVertexAttribArray(0);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+
+    public void createColorTriangle() {
+        int vbo, vao;
+
+        float[] vertices = {
+                // positions         // colors rgb
+                0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // bottom right
+                -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // bottom left
+                0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // top
+        };
+
+        vbo = glGenBuffers();
+        vao = glGenVertexArrays();
+
+        this.VAO = vao;
+
+        glBindVertexArray(vao);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+
+        //position attribute
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 24, 0);
+        glEnableVertexAttribArray(0);
+
+        //color attribute
+        glVertexAttribPointer(1, 3, GL_FLOAT, false, 24, 12);
+
+        //todo idk
+        glEnableVertexAttribArray(1);
     }
 
 
