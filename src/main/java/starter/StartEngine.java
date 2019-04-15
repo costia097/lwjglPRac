@@ -42,7 +42,10 @@ public class StartEngine {
 
 //        sceneRender.createTriangle();
 //        sceneRender.createRectangle();
-        sceneRender.createColorTriangle();
+//        sceneRender.createColorTriangle();
+
+
+        sceneRender.createTexturedRectangle();
 
         sceneRender.compileShaders();
 
