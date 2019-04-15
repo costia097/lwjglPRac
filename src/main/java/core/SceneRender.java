@@ -465,58 +465,40 @@ public class SceneRender {
         glVertexAttribPointer(2, 2, GL_FLOAT, false, 8 * Float.BYTES, 6 * Float.BYTES);
         glEnableVertexAttribArray(2);
 
-        byte[] firstImgBytes = new byte[0];
+        int width = 0;
+        int height = 0;
 
-        int widthFirst = 0;
-        int heightFirst = 0;
-
-        int[] pixeslRaw;
-
-        ByteBuffer buffer = null;
+        ByteBuffer imgByteBuffer = ByteBuffer.allocate(0);
 
         try {
             File input = new File("C:/Users/Kostia/IdeaProjects/lwjglPRac/src/main/resources/textures/wall.jpg");
             BufferedImage bufferedImageOne = ImageIO.read(input);
 
-            widthFirst = bufferedImageOne.getWidth();
-            heightFirst = bufferedImageOne.getHeight();
+            width = bufferedImageOne.getWidth();
+            height = bufferedImageOne.getHeight();
 
-            WritableRaster raster = bufferedImageOne.getRaster();
+            imgByteBuffer = BufferUtils.createByteBuffer(width * height * 4);
 
-            DataBufferByte data = (DataBufferByte) raster.getDataBuffer();
+            int[] pixeslRaw = bufferedImageOne.getRGB(0, 0, width, height, null, 0, width);
 
-            firstImgBytes = data.getData();
-
-            buffer = BufferUtils.createByteBuffer(widthFirst * heightFirst * 4);
-
-            pixeslRaw = bufferedImageOne.getRGB(0, 0, widthFirst, heightFirst, null, 0, widthFirst);
-
-            for (int i = 0; i <heightFirst; i++) {
-                for (int j = 0; j < widthFirst; j++) {
-                    int pixel = pixeslRaw[i * widthFirst + j];
-                    buffer.put((byte) ((pixel >> 16) & 0xFF));     // Red component
-                    buffer.put((byte) ((pixel >> 8) & 0xFF));      // Green component
-                    buffer.put((byte) (pixel & 0xFF));               // Blue component
+            for (int i = 0; i <height; i++) {
+                for (int j = 0; j < width; j++) {
+                    int pixel = pixeslRaw[i * width + j];
+                    imgByteBuffer.put((byte) ((pixel >> 16) & 0xFF));     // Red component
+                    imgByteBuffer.put((byte) ((pixel >> 8) & 0xFF));      // Green component
+                    imgByteBuffer.put((byte) (pixel & 0xFF));               // Blue component
+                    /*
+                    in png format exist alfa channel
+                     */
 //                    buffer.put((byte) ((pixel >> 24) & 0xFF));
                 }
             }
 
-            buffer.flip();
-
-//            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-//            ImageIO.write(bufferedImageOne, "jpg", byteArrayOutputStream);
-//            byte[] bytes = byteArrayOutputStream.toByteArray();
-//
-
-//            byte[] bytes = Files.readAllBytes(input.toPath());
-
-//            buffer = ByteBuffer.wrap(bytes);
+            imgByteBuffer.flip();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        ByteBuffer imgByteBufferOne = ByteBuffer.wrap(firstImgBytes);
 
         int textureOne = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, textureOne);
@@ -526,10 +508,10 @@ public class SceneRender {
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthFirst, heightFirst, 0, GL_RGB, GL_UNSIGNED_BYTE, buffer);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imgByteBuffer);
         glGenerateMipmap(GL_TEXTURE_2D);
 
-        imgByteBufferOne.clear();
+        imgByteBuffer.clear();
 
 //        glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
     }
