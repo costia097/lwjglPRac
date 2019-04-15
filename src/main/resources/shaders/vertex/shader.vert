@@ -7,7 +7,7 @@
 
 //out vec3 vertexColor;
 
-//uniform mat4 model;
+uniform mat4 model;
 
 
 layout(location = 0) in vec3 aPos;
@@ -18,12 +18,12 @@ out vec3 outColor;
 out vec2 texCoord;
 
 void main(){
-//    gl_Position = model * vec4(0.5 * pos.x  , 0.5 * pos.y, pos.z , 1.0);
+    gl_Position = model * vec4(aPos , 1.0);
 //    vertexColor = vec4(0.5, 1.0, 0.0, 1.0);
 //    gl_Position = vec4(aPos, 1.0);
 //    vertexColor = aColor;
 
-    gl_Position = vec4(aPos, 1.0);
+//    gl_Position = vec4(aPos, 1.0);
 
     outColor = aColor;
     texCoord = aTexCoord;

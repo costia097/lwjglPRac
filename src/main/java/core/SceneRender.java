@@ -2,7 +2,9 @@ package core;
 
 import org.apache.commons.io.IOUtils;
 import org.joml.Matrix4d;
+import org.joml.Matrix4f;
 import org.joml.Vector3d;
+import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 
@@ -139,20 +141,20 @@ public class SceneRender {
         /*
         some logic
          */
-//        if (direction) {
-//            triOffset += triIncremnt;
-//        } else {
-//            triOffset -= triIncremnt;
-//        }
-//
-//        if (Math.abs(triOffset) >= maxTriOff) {
-//            direction = !direction;
-//        }
+        if (direction) {
+            triOffset += triIncremnt;
+        } else {
+            triOffset -= triIncremnt;
+        }
+
+        if (Math.abs(triOffset) >= maxTriOff) {
+            direction = !direction;
+        }
 
         /*
         some logic with rotate
          */
-//        currentAngle += 0.1f;
+        currentAngle += 0.3f;
 
         /*
         idk -???
@@ -163,19 +165,19 @@ public class SceneRender {
         need to create flat buffer
         16 floats because matrix 4on 4 equal 16 slots
          */
-//        FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
+        FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
 
 
-//        Matrix4d translate = new Matrix4d()
-//                .translate(new Vector3d(triOffset, 0, 0))
-//                .rotate(currentAngle * toRadians, new Vector3d(0, 0, 1));
+        Matrix4f translate = new Matrix4f()
+//                .translate(new Vector3f(triOffset, 0, 0))
+                .rotate(currentAngle * toRadians, new Vector3f(0, 0, 1));
 //
-//        translate.get(matrixBuffer);
+        translate.get(matrixBuffer);
 
         /*
         idk -->??
          */
-//        glUniformMatrix4fv(uniformModel, false, matrixBuffer);
+        glUniformMatrix4fv(uniformModel, false, matrixBuffer);
 
 //        double timeValue = GLFW.glfwGetTime();
 
@@ -658,7 +660,7 @@ public class SceneRender {
         something like biding
         idk -???
          */
-//        uniformModel = glGetUniformLocation(shaderProgram, "model");
+        uniformModel = glGetUniformLocation(shaderProgram, "model");
     }
 
 }
