@@ -117,6 +117,8 @@ public class SceneRender {
 
     private float currentAngle = 0.0f;
 
+    private Matrix4f currentModel = new Matrix4f();
+
     public SceneRender() {
         /*
         i think clean screen before actions
@@ -141,20 +143,20 @@ public class SceneRender {
         /*
         some logic
          */
-        if (direction) {
-            triOffset += triIncremnt;
-        } else {
-            triOffset -= triIncremnt;
-        }
-
-        if (Math.abs(triOffset) >= maxTriOff) {
-            direction = !direction;
-        }
-
-        /*
-        some logic with rotate
-         */
-        currentAngle += 0.3f;
+//        if (direction) {
+//            triOffset += triIncremnt;
+//        } else {
+//            triOffset -= triIncremnt;
+//        }
+//
+//        if (Math.abs(triOffset) >= maxTriOff) {
+//            direction = !direction;
+//        }
+//
+//        /*
+//        some logic with rotate
+//         */
+//        currentAngle += 0.3f;
 
         /*
         idk -???
@@ -165,22 +167,51 @@ public class SceneRender {
         need to create flat buffer
         16 floats because matrix 4on 4 equal 16 slots
          */
-        FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
+
+//        int model = glGetUniformLocation(shaderProgram, "model");
+
+//        FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
 
 
-        Matrix4f translate = new Matrix4f()
+//        Matrix4f translate = new Matrix4f()
 //                .translate(new Vector3f(triOffset, 0, 0))
-                .rotate(currentAngle * toRadians, new Vector3f(0, 0, 1));
-//
-        translate.get(matrixBuffer);
+//                .rotate(-45 * toRadians, new Vector3f(0, 0, 1));
+
+//        translate.get(matrixBuffer);
 
         /*
         idk -->??
          */
-        glUniformMatrix4fv(uniformModel, false, matrixBuffer);
+//        glUniformMatrix4fv(model, false, matrixBuffer);
+
+        /*
+        create transformations
+         */
+        currentModel = currentModel.rotate(-0.1f * toRadians, new Vector3f(0, 1, 1));
+//        Matrix4f view = new Matrix4f().translate(new Vector3f(0, 0, -3.0f));
+//        Matrix4f projection = new Matrix4f().perspective(45f * toRadians, 800f / 600f, 0.1f, 100f);
+
+        /*
+        retrieve the matrix uniform locations
+         */
+        FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(16);
+//        FloatBuffer viewBuffer = BufferUtils.createFloatBuffer(16);
+//        FloatBuffer projectionBuffer = BufferUtils.createFloatBuffer(16);
+
+        currentModel.get(modelBuffer);
+//        view.get(viewBuffer);
+//        projection.get(projectionBuffer);
+
+        int modelLoc = glGetUniformLocation(shaderProgram, "model");
+//        int viewLoc = glGetUniformLocation(shaderProgram, "view");
+//        int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+
+        glUniformMatrix4fv(modelLoc, false, modelBuffer);
+//        glUniformMatrix4fv(viewLoc, false, viewBuffer);
+//        glUniformMatrix4fv(projectionLoc, false, projectionBuffer);
 
 //        double timeValue = GLFW.glfwGetTime();
-
+//
 //        float greenValue = (float) ((Math.sin(timeValue) / 2.0d) + 0.5d);
 //
 //        int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
@@ -198,12 +229,12 @@ public class SceneRender {
        The second argument specifies the starting index of the vertex array we'd like to draw; we just leave this at 0.
        The last argument specifies how many vertices we want to draw, which is 3 (we only render 1 triangle from our data, which is exactly 3 vertices long).
         */
-//        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         /*
          -- !!! Use that to indicate that we want to draw from an index buffer. For example in ebo (element buffer object) where we pass indexes
          */
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+//        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         /*
         unbiding
@@ -518,6 +549,81 @@ public class SceneRender {
 //        glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
     }
 
+    public void createCube() {
+
+        float[] vertices = {
+
+                //x     //y     //z
+
+                -0.5f, -0.5f, -0.5f,   0.0f, 0.0f,
+                0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+                0.5f, 0.5f, -0.5f,   1.0f, 1.0f,
+                0.5f, 0.5f, -0.5f,   1.0f, 1.0f,
+                -0.5f, 0.5f, -0.5f,   0.0f, 1.0f,
+                -0.5f, -0.5f, -0.5f,   0.0f, 0.0f,
+
+                -0.5f, -0.5f, 0.5f,   0.0f, 0.0f,
+                0.5f, -0.5f, 0.5f,   1.0f, 0.0f,
+                0.5f, 0.5f, 0.5f,   1.0f, 1.0f,
+                0.5f, 0.5f, 0.5f,   1.0f, 1.0f,
+                -0.5f, 0.5f, 0.5f,   0.0f, 1.0f,
+                -0.5f, -0.5f, 0.5f,   0.0f, 0.0f,
+
+                -0.5f, 0.5f, 0.5f,   1.0f, 0.0f,
+                -0.5f, 0.5f, -0.5f,   1.0f, 1.0f,
+                -0.5f, -0.5f, -0.5f,   0.0f, 1.0f,
+                -0.5f, -0.5f, -0.5f,   0.0f, 1.0f,
+                -0.5f, -0.5f, 0.5f,   0.0f, 0.0f,
+                -0.5f, 0.5f, 0.5f,   1.0f, 0.0f,
+
+                0.5f, 0.5f, 0.5f,   1.0f, 0.0f,
+                0.5f, 0.5f, -0.5f,   1.0f, 1.0f,
+                0.5f, -0.5f, -0.5f,   0.0f, 1.0f,
+                0.5f, -0.5f, -0.5f,   0.0f, 1.0f,
+                0.5f, -0.5f, 0.5f,   0.0f, 0.0f,
+                0.5f, 0.5f, 0.5f,   1.0f, 0.0f,
+
+                -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+                0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
+                0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+                0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+                -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+                -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+
+                -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
+                0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+                0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+                0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+                -0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
+                -0.5f, 0.5f, -0.5f, 0.0f, 1.0f
+        };
+
+//        float[] indexes = {
+//
+//        };
+
+        int ebo, vbo, vao;
+
+//        ebo = glGenBuffers();
+        vbo = glGenBuffers();
+        vao = glGenVertexArrays();
+
+        this.VAO = vao;
+
+        glBindVertexArray(vao);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+
+//        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+//        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexes, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
+        glEnableVertexAttribArray(0);
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+
 
     private int addShader(int shaderProgram, String shaderCode, int shaderType) {
 
@@ -660,7 +766,7 @@ public class SceneRender {
         something like biding
         idk -???
          */
-        uniformModel = glGetUniformLocation(shaderProgram, "model");
+//        uniformModel = glGetUniformLocation(shaderProgram, "model");
     }
 
 }

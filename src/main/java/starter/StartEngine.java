@@ -45,7 +45,9 @@ public class StartEngine {
 //        sceneRender.createColorTriangle();
 
 
-        sceneRender.createTexturedRectangle();
+//        sceneRender.createTexturedRectangle();
+
+        sceneRender.createCube();
 
         sceneRender.compileShaders();
 
