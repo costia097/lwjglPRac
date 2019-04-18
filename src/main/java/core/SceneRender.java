@@ -119,6 +119,20 @@ public class SceneRender {
 
     private Matrix4f currentModel = new Matrix4f();
 
+    private Vector3f[] cubePositions = {
+            new Vector3f(0.0f,  0.0f,  0.0f), //0
+            new Vector3f(2.0f,  5.0f, -15.0f), //1
+            new Vector3f(-1.5f, -2.2f, -2.5f), //2
+            new Vector3f(-3.8f, -2.0f, -12.3f), //3
+            new Vector3f( 2.4f, -0.4f, -3.5f), //4
+            new Vector3f(-1.7f,  3.0f, -7.5f), //5
+            new Vector3f(1.3f, -2.0f, -2.5f), //6
+            new Vector3f(1.5f,  2.0f, -2.5f), //7
+            new Vector3f(1.5f,  0.2f, -1.5f), //8
+            new Vector3f(-1.3f,  1.0f, -1.5f), //9
+    };
+
+
     public SceneRender() {
         /*
         i think clean screen before actions
@@ -187,26 +201,26 @@ public class SceneRender {
         /*
         create transformations
          */
-        currentModel = currentModel.rotate(-0.3f * toRadians, new Vector3f(0.5f, 1, 0));
+//        currentModel = currentModel.rotate(-0.3f * toRadians, new Vector3f(0.5f, 1, 0));
         Matrix4f view = new Matrix4f().translate(new Vector3f(0, 0, -3.0f));
-        Matrix4f projection = new Matrix4f().perspective(45f * toRadians, 800f / 600f, 0.1f, 100f);
+        Matrix4f projection = new Matrix4f().perspective(60.0f * toRadians, 800f / 600f, 0.1f, 100f);
 
         /*
         retrieve the matrix uniform locations
          */
-        FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(16);
+//        FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(16);
         FloatBuffer viewBuffer = BufferUtils.createFloatBuffer(16);
         FloatBuffer projectionBuffer = BufferUtils.createFloatBuffer(16);
 
-        currentModel.get(modelBuffer);
+//        currentModel.get(modelBuffer);
         view.get(viewBuffer);
         projection.get(projectionBuffer);
 
-        int modelLoc = glGetUniformLocation(shaderProgram, "model");
+//        int modelLoc = glGetUniformLocation(shaderProgram, "model");
         int viewLoc = glGetUniformLocation(shaderProgram, "view");
         int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
 
-        glUniformMatrix4fv(modelLoc, false, modelBuffer);
+//        glUniformMatrix4fv(modelLoc, false, modelBuffer);
         glUniformMatrix4fv(viewLoc, false, viewBuffer);
         glUniformMatrix4fv(projectionLoc, false, projectionBuffer);
 
@@ -234,7 +248,24 @@ public class SceneRender {
         /*
          -- !!! Use that to indicate that we want to draw from an index buffer. For example in ebo (element buffer object) where we pass indexes
          */
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+//        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+
+        for (Vector3f cubePosition : cubePositions) {
+            FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(16);
+
+            Matrix4f model = new Matrix4f()
+                    .translate(cubePosition)
+                    .rotate( 20.0f * toRadians, new Vector3f(0.5f, 1, 0));
+
+            model.get(modelBuffer);
+
+            int modelLoc = glGetUniformLocation(shaderProgram, "model");
+            glUniformMatrix4fv(modelLoc, false, modelBuffer);
+
+            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        }
+
 
         /*
         unbiding
@@ -676,6 +707,8 @@ public class SceneRender {
     }
 
     public void createCubeOptimized() {
+
+//        https://technology.cpm.org/general/3dgraph/?graph3ddata=____bWuRQuRQuRQRzqSuRQuRQTzqSzqSuRQUzqSzqSuRQVuRQzqSuRQWuRQuRQuRQbw7kw7kxmudDsaSuRQuRQzqSTzqSuRQzqSUzqSzqSzqSVzqSzqSzqSWuRQzqSzqSRuRQuRQzqSmw7kw7kxmudH1c
 
         glEnable(GL_DEPTH_TEST);
 
