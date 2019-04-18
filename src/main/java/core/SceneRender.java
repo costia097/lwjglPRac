@@ -26,6 +26,8 @@ import java.nio.file.Files;
 import static com.sun.org.apache.bcel.internal.util.SecuritySupport.getResourceAsStream;
 import static org.lwjgl.opengl.GL11.GL_BYTE;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL11.GL_FRONT_AND_BACK;
 import static org.lwjgl.opengl.GL11.GL_LINE;
@@ -100,8 +102,6 @@ public class SceneRender {
     private int VAO;
     private int shaderProgram;
 
-    private int textureOne;
-
     /*
     yeap important naming like model  so there are 4 types ...
      */
@@ -131,7 +131,7 @@ public class SceneRender {
         /*
        clear screen color before render something
          */
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         /*
         sets the given shader program to render
@@ -187,28 +187,28 @@ public class SceneRender {
         /*
         create transformations
          */
-        currentModel = currentModel.rotate(-0.1f * toRadians, new Vector3f(0, 1, 1));
-//        Matrix4f view = new Matrix4f().translate(new Vector3f(0, 0, -3.0f));
-//        Matrix4f projection = new Matrix4f().perspective(45f * toRadians, 800f / 600f, 0.1f, 100f);
+        currentModel = currentModel.rotate(-0.3f * toRadians, new Vector3f(0.5f, 1, 0));
+        Matrix4f view = new Matrix4f().translate(new Vector3f(0, 0, -3.0f));
+        Matrix4f projection = new Matrix4f().perspective(45f * toRadians, 800f / 600f, 0.1f, 100f);
 
         /*
         retrieve the matrix uniform locations
          */
         FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(16);
-//        FloatBuffer viewBuffer = BufferUtils.createFloatBuffer(16);
-//        FloatBuffer projectionBuffer = BufferUtils.createFloatBuffer(16);
+        FloatBuffer viewBuffer = BufferUtils.createFloatBuffer(16);
+        FloatBuffer projectionBuffer = BufferUtils.createFloatBuffer(16);
 
         currentModel.get(modelBuffer);
-//        view.get(viewBuffer);
-//        projection.get(projectionBuffer);
+        view.get(viewBuffer);
+        projection.get(projectionBuffer);
 
         int modelLoc = glGetUniformLocation(shaderProgram, "model");
-//        int viewLoc = glGetUniformLocation(shaderProgram, "view");
-//        int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+        int viewLoc = glGetUniformLocation(shaderProgram, "view");
+        int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
 
         glUniformMatrix4fv(modelLoc, false, modelBuffer);
-//        glUniformMatrix4fv(viewLoc, false, viewBuffer);
-//        glUniformMatrix4fv(projectionLoc, false, projectionBuffer);
+        glUniformMatrix4fv(viewLoc, false, viewBuffer);
+        glUniformMatrix4fv(projectionLoc, false, projectionBuffer);
 
 //        double timeValue = GLFW.glfwGetTime();
 //
@@ -229,12 +229,12 @@ public class SceneRender {
        The second argument specifies the starting index of the vertex array we'd like to draw; we just leave this at 0.
        The last argument specifies how many vertices we want to draw, which is 3 (we only render 1 triangle from our data, which is exactly 3 vertices long).
         */
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+//        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         /*
          -- !!! Use that to indicate that we want to draw from an index buffer. For example in ebo (element buffer object) where we pass indexes
          */
-//        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
         /*
         unbiding
@@ -536,8 +536,6 @@ public class SceneRender {
         int textureOne = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, textureOne);
 
-        this.textureOne = textureOne;
-
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -549,7 +547,9 @@ public class SceneRender {
 //        glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
     }
 
-    public void createCube() {
+    public void createCubeNotIptimazed() {
+
+        glEnable(GL_DEPTH_TEST);
 
         float[] vertices = {
 
@@ -598,6 +598,8 @@ public class SceneRender {
                 -0.5f, 0.5f, -0.5f, 0.0f, 1.0f
         };
 
+//        https://technology.cpm.org/general/3dgraph/?graph3ddata=____bWuRQuRQuRQRzqSuRQuRQTzqSzqSuRQUzqSzqSuRQVuRQzqSuRQWuRQuRQuRQbw7kw7kxmudDsaSuRQuRQzqSTzqSuRQzqSUzqSzqSzqSVzqSzqSzqSWuRQzqSzqSRuRQuRQzqSmw7kw7kxmudH1c
+
 //        float[] indexes = {
 //
 //        };
@@ -621,7 +623,183 @@ public class SceneRender {
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
         glEnableVertexAttribArray(0);
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
+        glEnableVertexAttribArray(1);
+
+//        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+        int width = 0;
+        int height = 0;
+
+        ByteBuffer imgByteBuffer = ByteBuffer.allocate(0);
+
+        try {
+            File input = new File("C:/Users/Kostia/IdeaProjects/lwjglPRac/src/main/resources/textures/wall.jpg");
+            BufferedImage bufferedImageOne = ImageIO.read(input);
+
+            width = bufferedImageOne.getWidth();
+            height = bufferedImageOne.getHeight();
+
+            imgByteBuffer = BufferUtils.createByteBuffer(width * height * 4);
+
+            int[] pixeslRaw = bufferedImageOne.getRGB(0, 0, width, height, null, 0, width);
+
+            for (int i = 0; i <height; i++) {
+                for (int j = 0; j < width; j++) {
+                    int pixel = pixeslRaw[i * width + j];
+                    imgByteBuffer.put((byte) ((pixel >> 16) & 0xFF));     // Red component
+                    imgByteBuffer.put((byte) ((pixel >> 8) & 0xFF));      // Green component
+                    imgByteBuffer.put((byte) (pixel & 0xFF));               // Blue component
+//                    imgByteBuffer.put((byte) ((pixel >> 24) & 0xFF));
+                }
+            }
+
+            imgByteBuffer.flip();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        int textureOne = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, textureOne);
+
+
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imgByteBuffer);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        imgByteBuffer.clear();
+
+        glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
+    }
+
+    public void createCubeOptimized() {
+
+        glEnable(GL_DEPTH_TEST);
+
+        float[] vertices = {
+
+                -0.5f, -0.5f, -0.5f,   0.0f, 0.0f, //0
+                0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  //1
+                0.5f, 0.5f, -0.5f,   1.0f, 1.0f,  // 2
+                -0.5f, 0.5f, -0.5f,   0.0f, 1.0f, //3
+
+                -0.5f, -0.5f, 0.5f,   0.0f, 0.0f, //4
+                0.5f, -0.5f, 0.5f,   1.0f, 0.0f, //5
+                0.5f, 0.5f, 0.5f,   1.0f, 1.0f, //6
+                -0.5f, 0.5f, 0.5f,   0.0f, 1.0f, // 7
+
+                -0.5f, 0.5f, 0.5f,   1.0f, 0.0f, //8
+                -0.5f, 0.5f, -0.5f,   1.0f, 1.0f, //9
+                -0.5f, -0.5f, -0.5f,   0.0f, 1.0f, //10
+                -0.5f, -0.5f, 0.5f,   0.0f, 0.0f, //11
+
+                0.5f, 0.5f, 0.5f,   1.0f, 0.0f, //12
+                0.5f, 0.5f, -0.5f,   1.0f, 1.0f, //13
+                0.5f, -0.5f, -0.5f,   0.0f, 1.0f, //14
+                0.5f, -0.5f, 0.5f,   0.0f, 0.0f, //15
+
+                -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, //16
+                0.5f, -0.5f, -0.5f, 1.0f, 1.0f, //17
+                0.5f, -0.5f, 0.5f, 1.0f, 0.0f, //18
+                -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,//19
+
+                -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, //20
+                0.5f, 0.5f, -0.5f, 1.0f, 1.0f, //21
+                0.5f, 0.5f, 0.5f, 1.0f, 0.0f, //22
+                -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, //23
+        };
+
+        int[] indexes = {
+                0,1,2,
+                2,3,0,
+
+                4,5,6,
+                6,7,4,
+
+                8,9,10,
+                10,11,8,
+
+                12,13,14,
+                14,15,12,
+
+                16,17,18,
+                18,19,16,
+
+                20,21,22,
+                22,23,20
+        };
+
+        int vbo, ebo , vao;
+
+        vbo = glGenBuffers();
+        ebo = glGenBuffers();
+        vao = glGenVertexArrays();
+
+        glBindVertexArray(vao);
+
+        this.VAO = vao;
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexes, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 5 * Float.BYTES, 0);
+        glEnableVertexAttribArray(0);
+
+        glVertexAttribPointer(1, 2, GL_FLOAT, false, 5 * Float.BYTES, 3 * Float.BYTES);
+        glEnableVertexAttribArray(1);
+
+        int width = 0;
+        int height = 0;
+
+        ByteBuffer imgByteBuffer = ByteBuffer.allocate(0);
+
+        try {
+            File input = new File("C:/Users/Kostia/IdeaProjects/lwjglPRac/src/main/resources/textures/wall.jpg");
+            BufferedImage bufferedImageOne = ImageIO.read(input);
+
+            width = bufferedImageOne.getWidth();
+            height = bufferedImageOne.getHeight();
+
+            imgByteBuffer = BufferUtils.createByteBuffer(width * height * 4);
+
+            int[] pixeslRaw = bufferedImageOne.getRGB(0, 0, width, height, null, 0, width);
+
+            for (int i = 0; i <height; i++) {
+                for (int j = 0; j < width; j++) {
+                    int pixel = pixeslRaw[i * width + j];
+                    imgByteBuffer.put((byte) ((pixel >> 16) & 0xFF));     // Red component
+                    imgByteBuffer.put((byte) ((pixel >> 8) & 0xFF));      // Green component
+                    imgByteBuffer.put((byte) (pixel & 0xFF));               // Blue component
+//                    imgByteBuffer.put((byte) ((pixel >> 24) & 0xFF));
+                }
+            }
+
+            imgByteBuffer.flip();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        int textureOne = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, textureOne);
+
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imgByteBuffer);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        imgByteBuffer.clear();
+
+        glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
+
+//        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
 
 

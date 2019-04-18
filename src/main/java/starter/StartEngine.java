@@ -47,7 +47,9 @@ public class StartEngine {
 
 //        sceneRender.createTexturedRectangle();
 
-        sceneRender.createCube();
+//        sceneRender.createCubeNotIptimazed();
+
+        sceneRender.createCubeOptimized();
 
         sceneRender.compileShaders();
 
