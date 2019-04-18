@@ -1,13 +1,20 @@
 package core;
 
+import org.joml.Vector3f;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.opengl.GL;
 
+import static core.SceneRender.deltaTime;
 import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR;
 import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_FORWARD_COMPAT;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_PROFILE;
@@ -23,6 +30,8 @@ import static org.lwjgl.glfw.GLFW.glfwGetPrimaryMonitor;
 import static org.lwjgl.glfw.GLFW.glfwGetVideoMode;
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
+import static org.lwjgl.glfw.GLFW.glfwSetCursorPosCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowPos;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowSizeCallback;
@@ -40,6 +49,9 @@ public class Window {
     something like this  -> GLFWwindow *window
      */
     private long windowPointer;
+
+    static Vector3f cameraPos = new Vector3f(0, 0, 3.0f);
+    private static Vector3f cameraFront = new Vector3f(0, 0, 1.0f);
 
     @FunctionalInterface
     public interface LoopFunction {
@@ -157,6 +169,40 @@ public class Window {
         if (glfwGetKey(windowPointer, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             glfwSetWindowShouldClose(windowPointer, true);
         }
+
+        float cameraSpeed = 2.5f;
+
+        if (glfwGetKey(windowPointer, GLFW_KEY_UP) == GLFW_PRESS) {
+            cameraPos.sub(new Vector3f(cameraFront).mul(cameraSpeed * deltaTime));
+        }
+
+        if (glfwGetKey(windowPointer, GLFW_KEY_DOWN) == GLFW_PRESS) {
+            cameraPos.add(new Vector3f(cameraFront).mul(cameraSpeed * deltaTime));
+        }
+
+        if (glfwGetKey(windowPointer, GLFW_KEY_LEFT) == GLFW_PRESS) {
+            Vector3f up = new Vector3f(0, 1.0f, 0);
+
+            Vector3f cross = up.cross(cameraFront);
+            Vector3f normalize = cross.normalize();
+
+            cameraPos.sub(new Vector3f(normalize).mul(cameraSpeed * deltaTime));
+        }
+
+        if (glfwGetKey(windowPointer, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+            Vector3f up = new Vector3f(0, 1.0f, 0);
+
+            Vector3f cross = up.cross(cameraFront);
+            Vector3f normalize = cross.normalize();
+
+            cameraPos.add(new Vector3f(normalize).mul(cameraSpeed * deltaTime));
+        }
+
+        //TODO add mouse callback
+        glfwSetCursorPosCallback(windowPointer, (window, xpos, ypos) -> {
+
+        });
+
     }
 
     public void loop(LoopFunction loopFunction) {

@@ -1,6 +1,7 @@
 package core;
 
 import org.apache.commons.io.IOUtils;
+import org.joml.Math;
 import org.joml.Matrix4d;
 import org.joml.Matrix4f;
 import org.joml.Vector3d;
@@ -24,6 +25,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 
 import static com.sun.org.apache.bcel.internal.util.SecuritySupport.getResourceAsStream;
+import static core.Window.cameraPos;
 import static org.lwjgl.opengl.GL11.GL_BYTE;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
@@ -115,9 +117,8 @@ public class SceneRender {
     @SuppressWarnings("FieldCanBeLocal")
     private final float toRadians = (float) (Math.PI / 180.0);
 
-    private float currentAngle = 0.0f;
-
-    private Matrix4f currentModel = new Matrix4f();
+    public static float deltaTime = 0.0f; // Time between current frame and last frame
+    private float lastFrame = 0.0f; // Time of last frame
 
     private Vector3f[] cubePositions = {
             new Vector3f(0.0f,  0.0f,  0.0f), //0
@@ -202,7 +203,14 @@ public class SceneRender {
         create transformations
          */
 //        currentModel = currentModel.rotate(-0.3f * toRadians, new Vector3f(0.5f, 1, 0));
-        Matrix4f view = new Matrix4f().translate(new Vector3f(0, 0, -3.0f));
+        Matrix4f view = new Matrix4f();
+
+        /*
+        some camera manipulations
+         */
+
+        view.lookAt(cameraPos, new Vector3f(cameraPos.x , cameraPos.y, 0), new Vector3f(0, 1.0f, 0));
+
         Matrix4f projection = new Matrix4f().perspective(60.0f * toRadians, 800f / 600f, 0.1f, 100f);
 
         /*
@@ -255,8 +263,8 @@ public class SceneRender {
             FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(16);
 
             Matrix4f model = new Matrix4f()
-                    .translate(cubePosition)
-                    .rotate( 20.0f * toRadians, new Vector3f(0.5f, 1, 0));
+                    .translate(cubePosition);
+//                    .rotate( 20.0f * toRadians, new Vector3f(0.5f, 1, 0));
 
             model.get(modelBuffer);
 
@@ -266,6 +274,10 @@ public class SceneRender {
             glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
         }
 
+        float currentFrame = (float) GLFW.glfwGetTime();
+
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
 
         /*
         unbiding
@@ -277,6 +289,8 @@ public class SceneRender {
          */
         glUseProgram(0);
 
+
+//        System.out.println(deltaTime);
     }
 
     /*
