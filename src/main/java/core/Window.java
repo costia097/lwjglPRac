@@ -1,5 +1,6 @@
 package core;
 
+import org.joml.Math;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -9,6 +10,8 @@ import org.lwjgl.opengl.GL;
 import static core.SceneRender.deltaTime;
 import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR;
 import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
+import static org.lwjgl.glfw.GLFW.GLFW_CURSOR;
+import static org.lwjgl.glfw.GLFW.GLFW_CURSOR_DISABLED;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
@@ -31,6 +34,7 @@ import static org.lwjgl.glfw.GLFW.glfwGetVideoMode;
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import static org.lwjgl.glfw.GLFW.glfwSetCursorPosCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetInputMode;
 import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowPos;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
@@ -51,7 +55,16 @@ public class Window {
     private long windowPointer;
 
     static Vector3f cameraPos = new Vector3f(0, 0, 3.0f);
-    private static Vector3f cameraFront = new Vector3f(0, 0, 1.0f);
+    static Vector3f cameraFront = new Vector3f(0, 0, -1.0f);
+
+    private final float toRadians = (float) (Math.PI / 180.0);
+
+    private float lastX = 400;
+    private float lastY = 300;
+    private float yaw = -90.0f;
+    private float pitch = 0;
+    private boolean firstMouse = true;
+
 
     @FunctionalInterface
     public interface LoopFunction {
@@ -159,6 +172,42 @@ public class Window {
             }
         });
 
+        glfwSetInputMode(windowPointer, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+        glfwSetCursorPosCallback(windowPointer, (window, xpos, ypos) -> {
+
+            if (firstMouse) {
+                lastX = (float) xpos;
+                lastY = (float) ypos;
+                firstMouse = false;
+            }
+
+            float xOffset = (float) xpos - lastX;
+            float yOffset = lastY - (float) ypos;
+
+            lastX = (float) xpos;
+            lastY = (float) ypos;
+
+            float sensivity = 0.1f;
+
+            xOffset *= sensivity;
+            yOffset *= sensivity;
+
+            yaw += xOffset;
+            pitch += yOffset;
+
+            if (pitch > 89.0f)
+                pitch = 89.0f;
+            if (pitch < -89.0f)
+                pitch = -89.0f;
+
+            Vector3f front = new Vector3f((float) (java.lang.Math.cos(yaw * toRadians) * java.lang.Math.cos(pitch * toRadians))
+                    , (float) java.lang.Math.sin(pitch * toRadians)
+                    , (float) (java.lang.Math.sin(yaw * toRadians) * java.lang.Math.cos(pitch* toRadians)));
+
+            cameraFront = front.normalize();
+        });
+
         /*
         Idk why???
          */
@@ -173,11 +222,11 @@ public class Window {
         float cameraSpeed = 2.5f;
 
         if (glfwGetKey(windowPointer, GLFW_KEY_UP) == GLFW_PRESS) {
-            cameraPos.sub(new Vector3f(cameraFront).mul(cameraSpeed * deltaTime));
+            cameraPos.add(new Vector3f(cameraFront).mul(cameraSpeed * deltaTime));
         }
 
         if (glfwGetKey(windowPointer, GLFW_KEY_DOWN) == GLFW_PRESS) {
-            cameraPos.add(new Vector3f(cameraFront).mul(cameraSpeed * deltaTime));
+            cameraPos.sub(new Vector3f(cameraFront).mul(cameraSpeed * deltaTime));
         }
 
         if (glfwGetKey(windowPointer, GLFW_KEY_LEFT) == GLFW_PRESS) {
@@ -186,7 +235,7 @@ public class Window {
             Vector3f cross = up.cross(cameraFront);
             Vector3f normalize = cross.normalize();
 
-            cameraPos.sub(new Vector3f(normalize).mul(cameraSpeed * deltaTime));
+            cameraPos.add(new Vector3f(normalize).mul(cameraSpeed * deltaTime));
         }
 
         if (glfwGetKey(windowPointer, GLFW_KEY_RIGHT) == GLFW_PRESS) {
@@ -195,13 +244,8 @@ public class Window {
             Vector3f cross = up.cross(cameraFront);
             Vector3f normalize = cross.normalize();
 
-            cameraPos.add(new Vector3f(normalize).mul(cameraSpeed * deltaTime));
+            cameraPos.sub(new Vector3f(normalize).mul(cameraSpeed * deltaTime));
         }
-
-        //TODO add mouse callback
-        glfwSetCursorPosCallback(windowPointer, (window, xpos, ypos) -> {
-
-        });
 
     }
 

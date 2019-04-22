@@ -23,8 +23,10 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.Random;
 
 import static com.sun.org.apache.bcel.internal.util.SecuritySupport.getResourceAsStream;
+import static core.Window.cameraFront;
 import static core.Window.cameraPos;
 import static org.lwjgl.opengl.GL11.GL_BYTE;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
@@ -35,6 +37,7 @@ import static org.lwjgl.opengl.GL11.GL_FRONT_AND_BACK;
 import static org.lwjgl.opengl.GL11.GL_LINE;
 import static org.lwjgl.opengl.GL11.GL_LINEAR;
 import static org.lwjgl.opengl.GL11.GL_LINEAR_MIPMAP_LINEAR;
+import static org.lwjgl.opengl.GL11.GL_LINES;
 import static org.lwjgl.opengl.GL11.GL_NEAREST;
 import static org.lwjgl.opengl.GL11.GL_REPEAT;
 import static org.lwjgl.opengl.GL11.GL_RGB;
@@ -48,18 +51,27 @@ import static org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_T;
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
 import static org.lwjgl.opengl.GL11.GL_UNSIGNED_INT;
+import static org.lwjgl.opengl.GL11.glBegin;
 import static org.lwjgl.opengl.GL11.glBindTexture;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.glColor3f;
 import static org.lwjgl.opengl.GL11.glDrawArrays;
 import static org.lwjgl.opengl.GL11.glDrawElements;
 import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11.glEnd;
 import static org.lwjgl.opengl.GL11.glGenTextures;
+import static org.lwjgl.opengl.GL11.glLoadIdentity;
 import static org.lwjgl.opengl.GL11.glPolygonMode;
+import static org.lwjgl.opengl.GL11.glPopMatrix;
+import static org.lwjgl.opengl.GL11.glPushMatrix;
+import static org.lwjgl.opengl.GL11.glRotatef;
 import static org.lwjgl.opengl.GL11.glTexImage2D;
 import static org.lwjgl.opengl.GL11.glTexParameterf;
 import static org.lwjgl.opengl.GL11.glTexParameterfv;
 import static org.lwjgl.opengl.GL11.glTexParameteri;
+import static org.lwjgl.opengl.GL11.glTranslatef;
+import static org.lwjgl.opengl.GL11.glVertex3f;
 import static org.lwjgl.opengl.GL12.GL_TEXTURE_WRAP_R;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
@@ -99,6 +111,7 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
+@SuppressWarnings("Duplicates")
 public class SceneRender {
 
     private int VAO;
@@ -120,18 +133,35 @@ public class SceneRender {
     public static float deltaTime = 0.0f; // Time between current frame and last frame
     private float lastFrame = 0.0f; // Time of last frame
 
-    private Vector3f[] cubePositions = {
-            new Vector3f(0.0f,  0.0f,  0.0f), //0
-            new Vector3f(2.0f,  5.0f, -15.0f), //1
-            new Vector3f(-1.5f, -2.2f, -2.5f), //2
-            new Vector3f(-3.8f, -2.0f, -12.3f), //3
-            new Vector3f( 2.4f, -0.4f, -3.5f), //4
-            new Vector3f(-1.7f,  3.0f, -7.5f), //5
-            new Vector3f(1.3f, -2.0f, -2.5f), //6
-            new Vector3f(1.5f,  2.0f, -2.5f), //7
-            new Vector3f(1.5f,  0.2f, -1.5f), //8
-            new Vector3f(-1.3f,  1.0f, -1.5f), //9
+    private Random random = new Random();
+
+//    private Vector3f[] cubePositions = {
+//            new Vector3f(0.0f,  0.0f,  0.0f), //0
+//            new Vector3f(2.0f,  5.0f, -15.0f), //1
+//            new Vector3f(-1.5f, -2.2f, -2.5f), //2
+//            new Vector3f(-3.8f, -2.0f, -12.3f), //3
+//            new Vector3f( 2.4f, -0.4f, -3.5f), //4
+//            new Vector3f(-1.7f,  3.0f, -7.5f), //5
+//            new Vector3f(1.3f, -2.0f, -2.5f), //6
+//            new Vector3f(1.5f,  2.0f, -2.5f), //7
+//            new Vector3f(1.5f,  0.2f, -1.5f), //8
+//            new Vector3f(-1.3f,  1.0f, -1.5f), //9
+//    };
+
+    private Vector3f[] cubePositions = new Vector3f[]{
+            new Vector3f(0, 0, 0),
+            new Vector3f(1, 0, 0),
+            new Vector3f(-1, 0, 0),
     };
+
+    private void initCubePositions() {
+        for (int i = 0; i < 1; i++) {
+            Vector3f vector3f = new Vector3f(random.nextFloat() * 5, random.nextFloat() , random.nextFloat() * 3);
+            cubePositions[i] = vector3f;
+        }
+    }
+
+    private FloatBuffer modelFloatBuffer = BufferUtils.createFloatBuffer(16);
 
 
     public SceneRender() {
@@ -140,6 +170,8 @@ public class SceneRender {
         make it fully black
          */
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
+//        initCubePositions();
     }
 
     public void render() {
@@ -209,7 +241,7 @@ public class SceneRender {
         some camera manipulations
          */
 
-        view.lookAt(cameraPos, new Vector3f(cameraPos.x , cameraPos.y, 0), new Vector3f(0, 1.0f, 0));
+        view.lookAt(cameraPos, new Vector3f(cameraPos.x + cameraFront.x, cameraPos.y+cameraFront.y, cameraPos.z + cameraFront.z), new Vector3f(0, 1.0f, 0));
 
         Matrix4f projection = new Matrix4f().perspective(60.0f * toRadians, 800f / 600f, 0.1f, 100f);
 
@@ -260,19 +292,30 @@ public class SceneRender {
 
 
         for (Vector3f cubePosition : cubePositions) {
-            FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(16);
-
             Matrix4f model = new Matrix4f()
                     .translate(cubePosition);
 //                    .rotate( 20.0f * toRadians, new Vector3f(0.5f, 1, 0));
 
-            model.get(modelBuffer);
+            model.get(modelFloatBuffer);
 
             int modelLoc = glGetUniformLocation(shaderProgram, "model");
-            glUniformMatrix4fv(modelLoc, false, modelBuffer);
+            glUniformMatrix4fv(modelLoc, false, modelFloatBuffer);
 
             glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+            modelFloatBuffer.clear();
         }
+
+//        FloatBuffer modelBuffer = BufferUtils.createFloatBuffer(16);
+//        Matrix4f model = new Matrix4f()
+//                .translate(new Vector3f(3, 3, 0));
+//
+//        model.get(modelBuffer);
+//
+//        int modelLoc = glGetUniformLocation(shaderProgram, "model");
+//        glUniformMatrix4fv(modelLoc, false, modelBuffer);
+//
+//        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         float currentFrame = (float) GLFW.glfwGetTime();
 
@@ -288,9 +331,6 @@ public class SceneRender {
         unbiding
          */
         glUseProgram(0);
-
-
-//        System.out.println(deltaTime);
     }
 
     /*
@@ -847,6 +887,33 @@ public class SceneRender {
         glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
 
 //        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+
+    public void createRectangleWithTrianglePhysicsScene() {
+        float[] verticesOfTriangle = {
+                -0.5f, -0.5f, 0.0f,
+                0.5f, -0.5f, 0.0f,
+                0.0f, 0.5f, 0.0f
+        };
+
+        int vao = glGenVertexArrays();
+
+        VAO = vao;
+
+        glBindVertexArray(vao);
+
+        int vbo = glGenBuffers();
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, verticesOfTriangle, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+        glEnableVertexAttribArray(0);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
 
 

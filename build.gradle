@@ -25,4 +25,14 @@ dependencies {
     compile group: 'org.joml', name: 'joml', version: '1.9.13'
 
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
+    
+    compile group: 'org.dyn4j', name: 'dyn4j', version: '3.3.0'
+
+    // https://mvnrepository.com/artifact/net.java.dev.jna/jna
+    compile group: 'net.java.dev.jna', name: 'jna', version: '5.2.0'
+
+    compile group: 'org.openjfx', name: 'javafx-controls', version: '13-ea+5'
+
+    // https://mvnrepository.com/artifact/org.ow2.asm/asm
+    compile group: 'org.ow2.asm', name: 'asm', version: '7.1'
 }

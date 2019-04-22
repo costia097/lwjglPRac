@@ -1,5 +1,6 @@
 package starter;
 
+import com.sun.jna.Native;
 import core.SceneRender;
 import core.Window;
 import org.lwjgl.Version;
@@ -10,12 +11,22 @@ import static org.lwjgl.glfw.GLFW.glfwTerminate;
 
 public class StartEngine {
 
-    public static void main(String[] args) {
+    private static final boolean isLoadRenderDoc = false;
 
-        /*
+    public static void main(String[] args) {
+        StartEngine startEngine = new StartEngine();
+        startEngine.start();
+    }
+
+    public void start() {
+          /*
         check version
          */
         System.out.println("LWJGL Version " + Version.getVersion() + " is working.");
+
+        if (isLoadRenderDoc) {
+            Native.load("renderdoc", RenderdocLibrary.class);
+        }
 
         /*
         print error if any exist
@@ -50,6 +61,8 @@ public class StartEngine {
 //        sceneRender.createCubeNotIptimazed();
 
         sceneRender.createCubeOptimized();
+
+//        sceneRender.createRectangleWithTrianglePhysicsScene();
 
         sceneRender.compileShaders();
 

@@ -31,5 +31,6 @@ void main(){
 //    outColor = aColor;
     texCoord = aTexCoord;
 
+//    Vclip=Mprojection⋅Mview⋅Mmodel⋅Vlocal
     gl_Position  = projection * view * model * vec4(aPos,1.0);
 }
