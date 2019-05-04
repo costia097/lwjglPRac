@@ -35,4 +35,7 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.ow2.asm/asm
     compile group: 'org.ow2.asm', name: 'asm', version: '7.1'
+
+    // https://mvnrepository.com/artifact/org.lwjgl/lwjgl-assimp
+    compile group: 'org.lwjgl', name: 'lwjgl-assimp', version: '3.2.1'
 }
