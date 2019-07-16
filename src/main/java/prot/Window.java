@@ -13,15 +13,18 @@ import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT;
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_FORWARD_COMPAT;
 import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_PROFILE;
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
+import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 import static org.lwjgl.glfw.GLFW.GLFW_RESIZABLE;
 import static org.lwjgl.glfw.GLFW.GLFW_TRUE;
 import static org.lwjgl.glfw.GLFW.GLFW_VISIBLE;
 import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
 import static org.lwjgl.glfw.GLFW.glfwDefaultWindowHints;
+import static org.lwjgl.glfw.GLFW.glfwGetCursorPos;
 import static org.lwjgl.glfw.GLFW.glfwGetFramebufferSize;
 import static org.lwjgl.glfw.GLFW.glfwGetKey;
 import static org.lwjgl.glfw.GLFW.glfwGetPrimaryMonitor;
@@ -30,6 +33,8 @@ import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import static org.lwjgl.glfw.GLFW.glfwSetCursorPosCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetInputMode;
+import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowPos;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
 import static org.lwjgl.glfw.GLFW.glfwSetWindowSizeCallback;
@@ -97,10 +102,42 @@ class Window {
 
 //        glfwSetInputMode(windowPointer, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-        glfwSetCursorPosCallback(windowPointer, (window, xpos, ypos) -> {
+
+        double[] xPos = new double[1];
+        double[] yPos = new double[1];
+
+        glfwSetMouseButtonCallback(windowPointer, (window, button, action, mods) -> {
+            if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+                glfwGetCursorPos(window, xPos, yPos);
+                double x = convertToPixel(xPos[0], width, true);
+                double y = convertToPixel(yPos[0], height, false);
+
+                drawContexts.get(0).setPosition(new Fvector((float) x, (float) y, 0));
+//                System.out.println("Left mouse pressed X " + xPos[0] / width + "y:" + yPos[0] / height);
+            }
+
+
+//            if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+//                System.out.println("Left mouse released");
+//            }
+
         });
 
+//        glfwSetCursorPosCallback(windowPointer, (window, xpos, ypos) -> {
+//            System.out.println("window: " + window + "X: " + xpos + " Y: " + ypos);
+//        });
+
         glViewport(0, 0, bufferWith[0], bufferHeight[0]);
+    }
+
+    private double convertToPixel(double norlmal, double maxValue, boolean isX) {
+        double xMiddle = maxValue / 2;
+        double koef = (norlmal - xMiddle) / xMiddle;
+        if (norlmal >= xMiddle) {
+            return isX ? koef : koef * -1;
+        } else {
+            return isX ? koef : koef * -1;
+        }
     }
 
     void loop(LoopFunction loopFunction) {

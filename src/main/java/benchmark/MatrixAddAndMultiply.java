@@ -21,7 +21,7 @@ public class MatrixAddAndMultiply {
 
         Matrix4d result = null;
 
-        for (int i = 0; i < 1_000_000_000; i++) {
+        for (int i = 0; i < 1_000; i++) {
             result = matrixOne.mul(matrixToAdd);
         }
 

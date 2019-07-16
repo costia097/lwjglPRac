@@ -2,10 +2,11 @@ package prot;
 
 import org.apache.commons.io.IOUtils;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import static com.sun.org.apache.bcel.internal.util.SecuritySupport.getResourceAsStream;
 import static org.lwjgl.opengl.GL20.GL_COMPILE_STATUS;
 import static org.lwjgl.opengl.GL20.GL_FRAGMENT_SHADER;
 import static org.lwjgl.opengl.GL20.GL_LINK_STATUS;
@@ -44,14 +45,17 @@ class Shader {
             return ;
         }
 
-        String vShader = "";
-        String fShader = "";
+        String vShader;
+        String fShader;
 
         try {
-            vShader = IOUtils.toString(getResourceAsStream(vertexShaderPath), Charset.defaultCharset());
-            fShader = IOUtils.toString(getResourceAsStream(fragmentShaderPath), Charset.defaultCharset());
+            File vertexShaderFile = new File(vertexShaderPath);
+            File fragmentShaderFile = new File(fragmentShaderPath);
+
+            vShader = IOUtils.toString(new FileInputStream(vertexShaderFile), Charset.defaultCharset());
+            fShader = IOUtils.toString(new FileInputStream(fragmentShaderFile), Charset.defaultCharset());
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error while loading shaders ", e);
         }
 
         int vertexShader = addShader(shaderProgram, vShader, GL_VERTEX_SHADER);

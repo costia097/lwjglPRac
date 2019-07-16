@@ -1,7 +1,9 @@
 package prot;
 
+import com.sun.jna.Native;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import prac.starter.RenderdocLibrary;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +35,7 @@ import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 public class Start {
 
     public static List<DrawContext> drawContexts = new ArrayList<>();
+    private static final boolean isLoadRenderDoc = false;
 
     public static void main(String[] args) {
         Start start = new Start();
@@ -49,6 +52,10 @@ public class Start {
             throw new IllegalStateException("Unable to initialize GLFW");
         }
 
+        if (isLoadRenderDoc) {
+            Native.load("/home/kostia/librenderdoc.so", RenderdocLibrary.class);
+        }
+
         Window window = new Window(800, 600, "Prot");
 
         int[] params = new int[1];
@@ -57,11 +64,11 @@ public class Start {
 
 //        List<DrawContext> drawContexts = new ArrayList<>();
 
-        Shader shader = new Shader("shaders/prot/fragment/shader.frag", "shaders/prot/vertex/shader.vert");
+        Shader shader = new Shader("src/main/resources/shaders/prot/fragment/shader.frag", "src/main/resources/shaders/prot/vertex/shader.vert");
 
         shader.compile();
 
-        Shader shaderTest = new Shader("shaders/prot/fragment/test.frag", "shaders/prot/vertex/test.vert");
+        Shader shaderTest = new Shader("src/main/resources/shaders/prot/fragment/test.frag", "src/main/resources/shaders/prot/vertex/test.vert");
 
         shaderTest.compile();
 

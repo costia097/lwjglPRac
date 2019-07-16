@@ -16,7 +16,6 @@ import java.nio.FloatBuffer;
 import java.nio.charset.Charset;
 import java.util.Random;
 
-import static com.sun.org.apache.bcel.internal.util.SecuritySupport.getResourceAsStream;
 import static prac.core.Window.cameraFront;
 import static prac.core.Window.cameraPos;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
@@ -949,8 +948,8 @@ public class SceneRender {
         String fShader = "";
 
         try {
-            vShader = IOUtils.toString(getResourceAsStream("shaders/prac/vertex/shader.vert"), Charset.defaultCharset());
-            fShader = IOUtils.toString(getResourceAsStream("shaders/prac/fragment/shader.frag"), Charset.defaultCharset());
+            vShader = IOUtils.toString(getClass().getResourceAsStream("shaders/prac/vertex/shader.vert"), Charset.defaultCharset());
+            fShader = IOUtils.toString(getClass().getResourceAsStream("shaders/prac/fragment/shader.frag"), Charset.defaultCharset());
         } catch (IOException e) {
             e.printStackTrace();
         }
