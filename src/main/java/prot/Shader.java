@@ -25,7 +25,6 @@ import static org.lwjgl.opengl.GL20.glLinkProgram;
 import static org.lwjgl.opengl.GL20.glShaderSource;
 import static org.lwjgl.opengl.GL20.glValidateProgram;
 
-@SuppressWarnings("Duplicates")
 class Shader {
     private int shaderProgram;
     private String fragmentShaderPath;
@@ -37,8 +36,7 @@ class Shader {
     }
 
     void compile() {
-        int shaderProgram = glCreateProgram();
-        this.shaderProgram = shaderProgram;
+        this.shaderProgram  = glCreateProgram();
 
         if (shaderProgram == 0) {
             System.out.println("Error while creating shaderProgram program");

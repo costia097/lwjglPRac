@@ -1,5 +1,5 @@
 package prot;
 
-public interface LoopFunction {
+public interface RenderLoop {
     void doLoop();
 }

@@ -1,5 +1,6 @@
 package prot;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class Fvector {
     private float x;
     private float y;
@@ -11,15 +12,27 @@ public class Fvector {
         this.z = z;
     }
 
-    public float getX() {
+    float getX() {
         return x;
     }
 
-    public float getY() {
+    float getY() {
         return y;
     }
 
-    public float getZ() {
+    float getZ() {
         return z;
+    }
+
+    public void setX(float x) {
+        this.x = x;
+    }
+
+    public void setY(float y) {
+        this.y = y;
+    }
+
+    public void setZ(float z) {
+        this.z = z;
     }
 }
