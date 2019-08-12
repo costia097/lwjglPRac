@@ -5,37 +5,74 @@ plugins {
 group 'lwjgl'
 version '1.0-SNAPSHOT'
 
-sourceCompatibility = 1.8
 
 repositories {
+    jcenter()
     mavenCentral()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "https://raw.githubusercontent.com/SpinyOwl/repo/snapshots" }
+    maven { url "https://raw.githubusercontent.com/SpinyOwl/repo/releases" }
 }
+
+//@formatter:off
+def log4j_version        = '2.3'
+def commons_version      = '3.4'
+def commons_collections  = '4.1'
+def guava_version        = '19.0'
+def gson_version         = '2.7'
+
+def joml_version         = "1.9.9-SNAPSHOT"
+def lwjgl_version        = '3.2.2-SNAPSHOT'
+def le_cbchain           = '1.0.0'
+def le_util              = '1.0.0'
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
-    compile group: 'org.lwjgl', name: 'lwjgl', version: '3.2.2'
+    //@formatter:off
+    compile group: "org.joml",                   name: "joml",                 version: joml_version
+    compile group: 'org.apache.logging.log4j',   name: 'log4j-core',           version: log4j_version,         changing: false
+    compile group: 'org.apache.commons',         name: 'commons-lang3',        version: commons_version,       changing: false
+    compile group: 'org.apache.commons',         name: 'commons-collections4', version: commons_collections,   changing: false
+    compile group: 'com.google.guava',           name: 'guava',                version: guava_version,         changing: false
+    compile group: 'com.google.code.gson',       name: 'gson',                 version: gson_version,          changing: false
 
-    compile group: 'org.lwjgl', name: 'lwjgl-platform', version: '3.0.0', ext: 'pom'
-    
-    compile group: 'org.lwjgl', name: 'lwjgl-opengl', version: '3.2.2'
+    compile group: 'org.liquidengine',           name: 'cbchain',              version: le_cbchain,            changing: true
+    compile group: 'org.liquidengine',           name: 'leutil',               version: le_util,               changing: true
 
-    compile group: 'org.lwjgl', name: 'lwjgl-glfw', version: '3.2.2'
+    compile group: 'org.lwjgl',                  name: 'lwjgl-stb',            version: lwjgl_version,         changing: true
+    runtime group: 'org.lwjgl',                  name: 'lwjgl-stb',            version: lwjgl_version,         changing: true,  classifier: 'natives-windows'
+    runtime group: 'org.lwjgl',                  name: 'lwjgl-stb',            version: lwjgl_version,         changing: true,  classifier: 'natives-linux'
+    runtime group: 'org.lwjgl',                  name: 'lwjgl-stb',            version: lwjgl_version,         changing: true,  classifier: 'natives-macos'
 
-    compile group: 'org.joml', name: 'joml', version: '1.9.13'
+    compile group: 'org.lwjgl',                  name: 'lwjgl-glfw',           version: lwjgl_version,         changing: true
+    runtime group: 'org.lwjgl',                  name: 'lwjgl-glfw',           version: lwjgl_version,         changing: true,  classifier: 'natives-windows'
+    runtime group: 'org.lwjgl',                  name: 'lwjgl-glfw',           version: lwjgl_version,         changing: true,  classifier: 'natives-linux'
+    runtime group: 'org.lwjgl',                  name: 'lwjgl-glfw',           version: lwjgl_version,         changing: true,  classifier: 'natives-macos'
 
-    compile group: 'commons-io', name: 'commons-io', version: '2.6'
-    
-    compile group: 'org.dyn4j', name: 'dyn4j', version: '3.3.0'
+    compile group: 'org.lwjgl',                  name: 'lwjgl-nanovg',         version: lwjgl_version,         changing: true
+    runtime group: 'org.lwjgl',                  name: 'lwjgl-nanovg',         version: lwjgl_version,         changing: true,  classifier: 'natives-windows'
+    runtime group: 'org.lwjgl',                  name: 'lwjgl-nanovg',         version: lwjgl_version,         changing: true,  classifier: 'natives-linux'
+    runtime group: 'org.lwjgl',                  name: 'lwjgl-nanovg',         version: lwjgl_version,         changing: true,  classifier: 'natives-macos'
+
+    compile group: 'org.lwjgl',                  name: 'lwjgl-opengl',         version: lwjgl_version,         changing: true
+    compile group: 'org.lwjgl',                  name: 'lwjgl-opengl',         version: lwjgl_version,         changing: true,  classifier: 'natives-windows'
+    compile group: 'org.lwjgl',                  name: 'lwjgl-opengl',         version: lwjgl_version,         changing: true,  classifier: 'natives-linux'
+    compile group: 'org.lwjgl',                  name: 'lwjgl-opengl',         version: lwjgl_version,         changing: true,  classifier: 'natives-macos'
+
+    compile group: 'org.lwjgl',                  name: 'lwjgl',                version: lwjgl_version,         changing: true
+    runtime group: 'org.lwjgl',                  name: 'lwjgl',                version: lwjgl_version,         changing: true,  classifier: 'natives-windows'
+    runtime group: 'org.lwjgl',                  name: 'lwjgl',                version: lwjgl_version,         changing: true,  classifier: 'natives-linux'
+    runtime group: 'org.lwjgl',                  name: 'lwjgl',                version: lwjgl_version,         changing: true,  classifier: 'natives-macos'
+
+    compile group: 'org.lwjgl',                  name: 'lwjgl-yoga',           version: lwjgl_version,         changing: true
+    runtime group: 'org.lwjgl',                  name: 'lwjgl-yoga',           version: lwjgl_version,         changing: true,  classifier: 'natives-windows'
+    runtime group: 'org.lwjgl',                  name: 'lwjgl-yoga',           version: lwjgl_version,         changing: true,  classifier: 'natives-linux'
+    runtime group: 'org.lwjgl',                  name: 'lwjgl-yoga',           version: lwjgl_version,         changing: true,  classifier: 'natives-macos'
 
     // https://mvnrepository.com/artifact/net.java.dev.jna/jna
-    compile group: 'net.java.dev.jna', name: 'jna', version: '5.2.0'
+    compile group: 'net.java.dev.jna', name: 'jna', version: '5.4.0'
 
-    compile group: 'org.openjfx', name: 'javafx-controls', version: '13-ea+5'
-
-    // https://mvnrepository.com/artifact/org.ow2.asm/asm
-    compile group: 'org.ow2.asm', name: 'asm', version: '7.1'
-
-    // https://mvnrepository.com/artifact/org.lwjgl/lwjgl-assimp
-    compile group: 'org.lwjgl', name: 'lwjgl-assimp', version: '3.2.1'
+    // https://mvnrepository.com/artifact/org.dyn4j/dyn4j
+    compile group: 'org.dyn4j', name: 'dyn4j', version: '3.3.0'
 }
