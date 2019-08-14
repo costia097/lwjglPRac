@@ -5,9 +5,14 @@ import lombok.Setter;
 import org.joml.Matrix4f;
 
 import static org.lwjgl.opengl.GL11C.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL15.GL_ELEMENT_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL15.glBindBuffer;
 import static org.lwjgl.opengl.GL30.GL_COLOR_ATTACHMENT0;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
+import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glFramebufferTexture2D;
+import static org.lwjgl.opengl.GL43.glBindVertexBuffer;
+import static protV2.render.CHW.checkGL;
 
 @Getter
 @Setter
@@ -27,8 +32,6 @@ public class CBackend {
     private int vb;
     private int ib;
 
-    private int vbStride;
-
     private R_constants constants;
     private R_constant_table ctable;
 
@@ -37,6 +40,10 @@ public class CBackend {
     private int ps;
     private int vs;
     private int gs;
+
+    private SDeclaration decl;
+
+    private int vb_stride;
 
     //todo
     public void setXform(int id, Matrix4f M) {
@@ -62,8 +69,52 @@ public class CBackend {
 
     }
 
-    //todo
-    public void setFormat() {
+    public void setFormat(SDeclaration _decl) {
+        if (decl != _decl) {
+            decl = _decl;
+            glBindVertexArray(_decl.getDcl());
+            checkGL();
+            // Clear cached index buffer
+            ib = 0;
+        }
+    }
 
+    public void setGeometry(SGeometry _geom) {
+        setFormat(_geom.getDcl());
+
+        setVertices(_geom.getVb(), _geom.getVbStride());
+        setIndices(_geom.getIb());
+    }
+
+    public void setVertices(int _vb, int _vb_stride) {
+        if (vb != _vb || vb_stride != _vb_stride) {
+            vb = _vb;
+            vb_stride = _vb_stride;
+            glBindVertexBuffer(0, vb, 0, vb_stride);
+            checkGL();
+        }
+    }
+
+    public void setIndices(int _ib) {
+        if (ib != _ib){
+            ib = _ib;
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib);
+            checkGL();
+        }
+    }
+
+    public void dbg_DP(D3DPRIMITIVETYPE pt, SGeometry geom, int vBase, int pc) {
+
+    }
+
+    public enum D3DPRIMITIVETYPE {
+        D3DPT_POINTLIST,
+        D3DPT_LINELIST,
+        D3DPT_LINESTRIP,
+        D3DPT_TRIANGLELIST,
+        D3DPT_TRIANGLESTRIP,
+        D3DPT_TRIANGLEFAN,
+        D3DPT_FORCE_DWORD,
+        ;
     }
 }

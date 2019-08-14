@@ -13,4 +13,5 @@ public class D3DVERTEXELEMENT9 {
     private char usage;
     private char usageIndex;
 
+
 }

@@ -2,7 +2,11 @@ package protV2.render;
 
 public class Resptrcode_geom {
 
+    private CResourceManager resourceManager;
+
     public void create(D3DVERTEXELEMENT9 decl, int vb, int ib){
+        SGeometry sGeometry = resourceManager.CreateGeom(decl, vb, ib);
+
 
     }
 
