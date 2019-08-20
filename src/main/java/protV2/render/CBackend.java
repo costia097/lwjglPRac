@@ -11,7 +11,9 @@ import static org.lwjgl.opengl.GL30.GL_COLOR_ATTACHMENT0;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glFramebufferTexture2D;
+import static org.lwjgl.opengl.GL41C.glUseProgramStages;
 import static org.lwjgl.opengl.GL43.glBindVertexBuffer;
+import static org.lwjgl.opengl.GL43.glGetObjectLabel;
 import static protV2.render.CHW.checkGL;
 
 @Getter
@@ -45,6 +47,8 @@ public class CBackend {
 
     private int vb_stride;
 
+    private CHW HW;
+
     //todo
     public void setXform(int id, Matrix4f M) {
 
@@ -65,7 +69,42 @@ public class CBackend {
 
     }
 
-    public void setPS() {
+    public void set_PS(SPS ps) {
+
+    }
+
+    public void set_PS(int _ps, String _n) {
+        if (ps != _ps) {
+            //todo
+//            glGetObjectLabel(322,_ps,);
+            ps = _ps;
+            glUseProgramStages(HW.getPPP(), 322, ps);
+            checkGL();
+        }
+    }
+
+    public void set_VS(SPS _ps) {
+        set_PS(_ps.getSh(), _ps.getCName());
+    }
+
+    public void set_Constants() {
+
+    }
+
+    public void set_Textures() {
+
+    }
+
+    public void set_States(SState _state) {
+        state = _state;
+        _state.Apply();
+    }
+
+    public void set_Element(ShaderElement S, int pass) {
+        SPass P = S.getPasses().get(0);
+        set_States(P.getState());
+        set_PS(P.getPs());
+
 
     }
 
