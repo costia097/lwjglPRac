@@ -190,7 +190,7 @@ public class CHW {
     public static void checkGL() {
         int res = glGetError();
         if (res != GL_NO_ERROR) {
-            throw new IllegalStateException("Error.");
+            throw new RuntimeException("Error.");
         }
     }
 

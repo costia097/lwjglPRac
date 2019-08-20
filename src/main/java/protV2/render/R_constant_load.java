@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class R_constant_load {
     private int index;
-    private int cls;
+    private R_constant_setup.RC cls;
 
     private int location;
     private int program;
