@@ -75,4 +75,7 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.dyn4j/dyn4j
     compile group: 'org.dyn4j', name: 'dyn4j', version: '3.3.0'
+
+    // https://mvnrepository.com/artifact/org.projectlombok/lombok
+    compile group: 'org.projectlombok', name: 'lombok', version: '1.18.8'
 }
